@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EditGenius AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100">
+    <div class="container mx-auto p-4">
+      <h1 class="text-3xl font-bold mb-6 text-center">EditGenius AI</h1>
+
+      <div class="bg-white p-6 rounded shadow-md max-w-xl mx-auto">
+        <form id="uploadForm" class="space-y-4">
+          <div>
+            <label class="block font-medium">Raw Video (.mp4)</label>
+            <input
+              type="file"
+              name="video"
+              accept="video/mp4"
+              required
+              class="mt-1"
+            />
+          </div>
+
+          <div>
+            <label class="block font-medium">Voiceover (.mp3)</label>
+            <input
+              type="file"
+              name="voiceover"
+              accept="audio/mpeg"
+              required
+              class="mt-1"
+            />
+          </div>
+
+          <div>
+            <label class="block font-medium">Background Music (.mp3)</label>
+            <input
+              type="file"
+              name="bgm"
+              accept="audio/mpeg"
+              required
+              class="mt-1"
+            />
+          </div>
+
+          <div>
+            <label class="block font-medium">Logo (.png)</label>
+            <input
+              type="file"
+              name="logo"
+              accept="image/png"
+              required
+              class="mt-1"
+            />
+          </div>
+
+          <div>
+            <label class="block font-medium">Transitions (.mp4, multiple)</label>
+            <input
+              type="file"
+              name="transitions"
+              multiple
+              accept="video/mp4"
+              required
+              class="mt-1"
+            />
+          </div>
+
+          <div>
+            <label class="block font-medium">Target Format</label>
+            <select name="target_format" class="mt-1">
+              <option value="youtube">YouTube (16:9)</option>
+              <option value="reel">Reel (9:16)</option>
+            </select>
+          </div>
+
+          <button
+            type="submit"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
+          >
+            Upload & Process
+          </button>
+        </form>
+
+        <div id="status" class="mt-4 text-center"></div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
