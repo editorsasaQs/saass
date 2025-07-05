@@ -3,8 +3,13 @@ document.getElementById("uploadForm").addEventListener("submit", async (e) => {
   const form = e.target;
   const formData = new FormData(form);
   const statusDiv = document.getElementById("status");
+  const progressContainer = document.getElementById("progressContainer");
+  const progressBar = document.getElementById("progressBar");
+  const progressText = document.getElementById("progressText");
 
-  statusDiv.innerHTML = "Uploading files...";
+  statusDiv.innerHTML = "";
+  progressContainer.classList.remove("hidden");
+  setProgress(10, "Uploading files...");
 
   try {
     const res = await fetch("/upload", {
@@ -18,15 +23,19 @@ document.getElementById("uploadForm").addEventListener("submit", async (e) => {
     }
 
     const jobId = data.job_id;
-    statusDiv.innerHTML = `Job ID: ${jobId}<br/>Processing...`;
+    setProgress(15, "Queued for processing...");
     pollStatus(jobId);
   } catch (err) {
-    statusDiv.innerHTML = `<span class="text-red-600">${err.message}</span>`;
+    progressContainer.classList.add("hidden");
+    statusDiv.innerHTML = `<span class="text-red-300">${err.message}</span>`;
   }
 });
 
 async function pollStatus(jobId) {
   const statusDiv = document.getElementById("status");
+  const progressContainer = document.getElementById("progressContainer");
+  const progressBar = document.getElementById("progressBar");
+  const progressText = document.getElementById("progressText");
   const interval = setInterval(async () => {
     try {
       const res = await fetch(`/status/${jobId}`);
@@ -34,16 +43,30 @@ async function pollStatus(jobId) {
 
       if (data.status === "completed") {
         clearInterval(interval);
-        statusDiv.innerHTML = `✅ Finished! <a href="/download/${jobId}" class="text-blue-600 underline">Download Video</a>`;
+        setProgress(100, "Completed ✔️");
+        statusDiv.innerHTML = `<a href="/download/${jobId}" class="text-yellow-300 underline font-medium">Download Edited Video</a>`;
       } else if (data.status === "error") {
         clearInterval(interval);
-        statusDiv.innerHTML = `<span class="text-red-600">Error: ${data.message}</span>`;
+        progressContainer.classList.add("hidden");
+        statusDiv.innerHTML = `<span class="text-red-300">Error: ${data.message}</span>`;
       } else {
-        statusDiv.innerHTML = `Status: ${data.status} ${data.step ? `- ${data.step}` : ""}`;
+        const stepProgress = {
+          transcription: 30,
+          scene_planning: 50,
+          video_editing: 80,
+        };
+        const pct = stepProgress[data.step] || 20;
+        setProgress(pct, `Processing: ${data.step || data.status}`);
       }
     } catch (err) {
       clearInterval(interval);
-      statusDiv.innerHTML = `<span class="text-red-600">${err.message}</span>`;
+      progressContainer.classList.add("hidden");
+      statusDiv.innerHTML = `<span class="text-red-300">${err.message}</span>`;
     }
   }, 4000);
+}
+
+function setProgress(percent, text) {
+  progressBar.style.width = `${percent}%`;
+  progressText.textContent = text;
 }
