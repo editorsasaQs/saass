@@ -38,3 +38,21 @@ EditGenius AI is a lightweight SaaS-style tool that automatically edits raw vide
 ## Deployment
 
 The app is fully self-contained; you can deploy on Render, Railway, or any container platform. Example Dockerfile is left as an exercise.
+
+## Optional Telegram Notifications
+
+Set these env variables to receive a Telegram message when a job completes or fails:
+
+```
+export TELEGRAM_BOT_TOKEN="<bot-token>"
+export TELEGRAM_CHAT_ID="<chat-id>"
+```
+
+## Docker
+
+Build and run using Docker:
+
+```bash
+docker build -t editgenius .
+docker run -p 8000:8000 -e GEMINI_API_KEY=YOUR_KEY -e TELEGRAM_BOT_TOKEN=XYZ -e TELEGRAM_CHAT_ID=123 editgenius
+```

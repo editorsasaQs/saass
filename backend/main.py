@@ -1,6 +1,7 @@
 import json
 import os
 import uuid
+from fastapi import HTTPException
 
 from fastapi import BackgroundTasks, FastAPI, File, Form, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
@@ -8,8 +9,10 @@ from fastapi.staticfiles import StaticFiles
 
 from .config import BASE_DIR, OUTPUT_DIR, UPLOAD_DIR
 from .video_processing import process_video
+from .logger import get_logger
 
 app = FastAPI(title="EditGenius AI")
+logger = get_logger(__name__)
 
 # Ensure necessary directories
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -36,7 +39,25 @@ async def upload(
     transitions: list[UploadFile] = File(...),
     target_format: str = Form("youtube"),
 ):
-    """Receive user files and enqueue processing job."""
+    """Receive user files and enqueue processing job with validation."""
+
+    # Basic validations
+    allowed_video_ct = {"video/mp4"}
+    allowed_audio_ct = {"audio/mpeg", "audio/mp3"}
+    allowed_img_ct = {"image/png"}
+
+    if video.content_type not in allowed_video_ct:
+        raise HTTPException(status_code=400, detail="Invalid video file type")
+    if voiceover.content_type not in allowed_audio_ct:
+        raise HTTPException(status_code=400, detail="Invalid voiceover file type")
+    if bgm.content_type not in allowed_audio_ct:
+        raise HTTPException(status_code=400, detail="Invalid background music file type")
+    if logo.content_type not in allowed_img_ct:
+        raise HTTPException(status_code=400, detail="Invalid logo file type (PNG required)")
+    if target_format not in {"youtube", "reel"}:
+        raise HTTPException(status_code=400, detail="target_format must be 'youtube' or 'reel'")
+
+    logger.info("New upload received. target_format=%s transitions=%d", target_format, len(transitions))
 
     job_id = str(uuid.uuid4())
     job_dir = os.path.join(UPLOAD_DIR, job_id)
